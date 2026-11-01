@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enrollmate — Student Application</title>
+<style>
+  :root{
+    --ink:#1c1a19;
+    --paper:#f6f3ee;
+    --card:#ffffff;
+    --tp-red:#a3242f;
+    --tp-red-dark:#7c1a23;
+    --line:#e4ded3;
+    --muted:#6b6459;
+    --ok:#2f6d4f;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Georgia',serif;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:64px 20px;
+  }
+
+  .stamp{
+    position:fixed;
+    top:28px; left:28px;
+    font-family:'Courier New', monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  .wrap{
+    width:100%;
+    max-width:640px;
+  }
+
+  .eyebrow{
+    font-family:'Courier New', monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--tp-red);
+    margin:0 0 10px 2px;
+  }
+
+  h1{
+    font-size:44px;
+    line-height:1.05;
+    margin:0 0 6px;
+    font-weight:400;
+    letter-spacing:-0.01em;
+  }
+
+  .sub{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    color:var(--muted);
+    font-size:15px;
+    margin:0 0 36px;
+    max-width:46ch;
+  }
+
+  form{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:36px;
+    position:relative;
+  }
+
+  form::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:4px;
+    background:var(--tp-red);
+  }
+
+  .field{
+    margin-bottom:22px;
+  }
+
+  .field label{
+    display:block;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:7px;
+  }
+
+  .field label .optional{
+    text-transform:none;
+    letter-spacing:0;
+    color:var(--muted);
+    font-size:11px;
+    font-weight:400;
+  }
+
+  .field input,
+  .field select{
+    width:100%;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:16px;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:2px;
+    background:#fdfcfa;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease;
+  }
+
+  .field input:focus,
+  .field select:focus{
+    border-color:var(--tp-red);
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+
+  .hint{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:6px;
+  }
+
+  .err{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:12px;
+    color:var(--tp-red);
+    margin-top:6px;
+    display:none;
+  }
+
+  .field.invalid input,
+  .field.invalid select{
+    border-color:var(--tp-red);
+  }
+  .field.invalid .err{
+    display:block;
+  }
+
+  button{
+    width:100%;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:14px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:15px;
+    border:none;
+    border-radius:2px;
+    background:var(--tp-red);
+    color:#fff;
+    cursor:pointer;
+    margin-top:6px;
+    transition:background .15s ease;
+  }
+  button:hover{ background:var(--tp-red-dark); }
+  button:active{ transform:translateY(1px); }
+
+  .log{
+    margin-top:28px;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:2px;
+    overflow:hidden;
+  }
+
+  .log-head{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  .entries{
+    max-height:220px;
+    overflow-y:auto;
+  }
+
+  .entry{
+    padding:12px 18px;
+    border-bottom:1px solid var(--line);
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:13px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    color:var(--ink);
+  }
+  .entry:last-child{ border-bottom:none; }
+  .entry .name{ font-weight:600; }
+  .entry .meta{ color:var(--muted); }
+
+  .empty{
+    padding:22px 18px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    text-align:center;
+  }
+
+  .toast{
+    position:fixed;
+    bottom:28px; left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ok);
+    color:#fff;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:13px;
+    padding:12px 20px;
+    border-radius:3px;
+    opacity:0;
+    pointer-events:none;
+    transition:all .25s ease;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+  <div class="stamp">TEMASEK POLYTECHNIC — SCHOOL OF INFORMATICS &amp; IT</div>
+
+  <div class="wrap">
+    <p class="eyebrow">Enrollmate — Student Intake</p>
+    <h1>Student Application Form</h1>
+    <p class="sub">Fill in your details below. Once submitted, your application is queued for review and enrolment processing.</p>
+
+    <form id="enrolForm" novalidate>
+      <div class="field" id="f-name">
+        <label for="name">Full name</label>
+        <input type="text" id="name" placeholder="e.g. John Tan">
+        <div class="err">Please enter your full name.</div>
+      </div>
+
+      <div class="row">
+        <div class="field" id="f-age">
+          <label for="age">Age</label>
+          <input type="number" id="age" placeholder="e.g. 16" min="1" max="99">
+          <div class="err">Age must be between 3 and 25.</div>
+        </div>
+        <div class="field" id="f-course">
+          <label for="course">Course applied</label>
+          <select id="course">
+            <option value="">Select a course</option>
+            <option>IT</option>
+            <option>Business</option>
+            <option>Design</option>
+          </select>
+          <div class="err">Please select a course.</div>
+        </div>
+      </div>
+
+      <div class="field" id="f-contact">
+        <label for="contact">Contact number <span class="optional">(optional)</span></label>
+        <input type="text" id="contact" placeholder="e.g. 91234567">
+        <div class="err">Please enter a valid contact number.</div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label for="email">Email address <span class="optional">(optional)</span></label>
+        <input type="email" id="email" placeholder="e.g. john.tan@example.com">
+        <div class="err">Please enter a valid email address.</div>
+      </div>
+
+      <button type="submit">Submit application</button>
+    </form>
+
+    <div class="log">
+      <div class="log-head">
+        <span id="countLabel">0 applications queued</span>
+      </div>
+      <div class="entries" id="entries">
+        <div class="empty">No applications yet — submissions will appear here.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Application submitted</div>
+
+<script>
+  const form = document.getElementById('enrolForm');
+  const entriesEl = document.getElementById('entries');
+  const countLabel = document.getElementById('countLabel');
+  const toast = document.getElementById('toast');
+
+  let submissions = [];
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 2200);
+  }
+
+  function setInvalid(id, invalid){
+    const field = document.getElementById('f-' + id);
+    field.classList.toggle('invalid', invalid);
+  }
+
+  function validate(){
+    const name = document.getElementById('name').value.trim();
+    const age = document.getElementById('age').value.trim();
+    const course = document.getElementById('course').value;
+    const contact = document.getElementById('contact').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    let valid = true;
+
+    // Required: Name
+    setInvalid('name', name === '');
+    if(name === '') valid = false;
+
+    // Required: Age (3–25)
+    const ageNum = Number(age);
+    const ageBad = age === '' || isNaN(ageNum) || ageNum < 3 || ageNum > 25;
+    setInvalid('age', ageBad);
+    if(ageBad) valid = false;
+
+    // Required: Course
+    setInvalid('course', course === '');
+    if(course === '') valid = false;
+
+
+    const contactBad = contact !== '' && contact.length < 3;
+    setInvalid('contact', contactBad);
+    if(contactBad) valid = false;
+
+
+    const emailBad = email !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    setInvalid('email', emailBad);
+    if(emailBad) valid = false;
+
+    return valid ? {name, age: ageNum, course, contact, email} : null;
+  }
+
+  function renderEntries(){
+    if(submissions.length === 0){
+      entriesEl.innerHTML = '<div class="empty">No applications yet — submissions will appear here.</div>';
+    } else {
+      entriesEl.innerHTML = submissions.slice().reverse().map(s => `
+        <div class="entry">
+          <span class="name">${escapeHtml(s.name)}</span>
+          <span class="meta">${escapeHtml(s.course)} · age ${s.age}</span>
+        </div>
+      `).join('');
+    }
+    countLabel.textContent = submissions.length + ' application' + (submissions.length === 1 ? '' : 's') + ' queued';
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+
+  async function loadFromServer(){
+    try{
+      const res = await fetch('/students');
+      if(!res.ok) return;
+      const rows = await res.json();
+      submissions = rows.map(r => ({
+        name: r.Name, age: r.Age, contact: r.Contact, email: r.Email, course: r.Course
+      }));
+      renderEntries();
+    }catch(err){
+
+    }
+  }
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const data = validate();
+    if(!data) return;
+
+    try{
+      const res = await fetch('/submit', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      if(!res.ok) throw new Error('save failed');
+
+      submissions.push(data);
+      renderEntries();
+      showToast('Saved to database — ' + data.name);
+    }catch(err){
+      showToast('Could not reach server — is server.js running?');
+    }
+
+    form.reset();
+    ['name','age','course','contact','email'].forEach(id => setInvalid(id, false));
+  });
+
+  loadFromServer();
+</script>
+
+</body>
+</html>

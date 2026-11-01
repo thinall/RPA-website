@@ -1,0 +1,13 @@
+{
+  "name": "enrollmate-server",
+  "version": "1.0.0",
+  "description": "Mini server that writes Enrollmate form submissions directly into the SQLite database used by the UiPath project.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "express": "^4.22.2"
+  }
+}
